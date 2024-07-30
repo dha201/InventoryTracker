@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { db } from "~/server/db";
 
+// Make sure to change TS version to match with workspace instead of vscode
+
+// Convert page to a dynamic page, making sure that everytime something changes in the database, the page is revalidated
+export const dynamic = "force-dynamic";
+
 const mockUrls = [
   "https://utfs.io/f/369adc9d-e57e-4871-a8ac-771e3612431b-ttk1f7.png",
   "https://utfs.io/f/ae81c410-ce20-4d32-a5b9-fc12ccd151bb-xycc3p.png",
