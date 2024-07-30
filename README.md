@@ -5,7 +5,7 @@
 [x] Set up a database (Vercel Postgres)
 [x] attach database to UI
 [x] Add authentication (w/ Clerk)
-[] Add image upload
+[x] Add image upload
 [] Error management (w/ Sentry)
 [] Routing/image page (parallel route)
 [] Delete Button (w/ server actions)
