@@ -18,11 +18,14 @@ import {
  */
 export const createTable = pgTableCreator((name) => `demo_${name}`);
 
-export const posts = createTable(
+
+/** */
+export const images = createTable(
   "post",
   {
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 256 }),
+    url: varchar("url", { length: 1024}).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
