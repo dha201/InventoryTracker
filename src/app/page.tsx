@@ -3,6 +3,7 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useAuth } from "@clerk/nextjs";
 import {
   collection,
   addDoc,
@@ -13,6 +14,7 @@ import {
   onSnapshot,
   deleteDoc,
   doc,
+  where, 
 } from 'firebase/firestore';
 import { db } from '~/server/db';
 
@@ -31,6 +33,7 @@ interface Image {
   name: string;
   url: string;
 }
+
 
 // Make sure to change TS version to match with workspace instead of vscode
 
@@ -89,17 +92,24 @@ export const dynamic = "force-dynamic";
  * 
  */
   function Images() {
+  const { userId } = useAuth();
   const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
-    const q = query(collection(db, 'images'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const imagesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Image));
-      setImages(imagesData);
-    });
+    if (userId) {
+      const q = query(
+        collection(db, 'images'),
+        where("userId", "==", userId),
+        orderBy('createdAt', 'desc')
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const imagesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Image));
+        setImages(imagesData);
+      });
 
-    return () => unsubscribe();
-  }, []);
+      return () => unsubscribe();
+    }
+  }, [userId]);
 
   return (
     <div className="flex flex-wrap gap-4">
@@ -123,15 +133,18 @@ export default function HomePage() {
   const [items, setItems] = useState<Item[]>([]);
   const [newItem, setNewItem] = useState({ name: '', price: '' });
   const [total, setTotal] = useState(0);
+  const { userId } = useAuth();
+
 
   const itemsCollection = collection(db, 'items');
 
   const addItem = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if(newItem.name && newItem.price) {
+    if(newItem.name && newItem.price && userId) {
       await addDoc(itemsCollection, {
         name: newItem.name.trim(),
         price: newItem.price,
+        userId: userId,
       });
       setNewItem({ name: '', price: '' });
     }
@@ -146,7 +159,7 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    const q = query(itemsCollection);
+    const q = query(itemsCollection, where("userId", "==", userId));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const itemsArr: Item[] = querySnapshot.docs.map(doc => {
         const data = doc.data();
@@ -160,7 +173,7 @@ export default function HomePage() {
       setTotal(calculateTotal(itemsArr));
     });
     return unsubscribe;
-  }, []);
+  }, [userId]);
   
   
 
