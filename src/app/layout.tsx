@@ -5,7 +5,7 @@ import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@c
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
-import { TopNav } from "~/app/_component/topnav";
+import { TopNav } from "~/app/components/topnav";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "./api/uploadthing/core";
