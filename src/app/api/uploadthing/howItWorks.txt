@@ -1,0 +1,30 @@
+1. Database Setup: The code you've shared sets up the Drizzle ORM to work with Vercel Postgres. It uses the drizzle function from 'drizzle-orm/vercel-postgres' and the sql object from "@vercel/postgres" to create a database connection. The schema import contains all the table definitions.
+
+src/server/db/index.ts sets up the Drizzle ORM connection with Vercel Postgres.
+src/server/db/schema.ts defines the database schema, including the 'images' table structure.
+
+2. Database Interaction: The db object created is used throughout the application to interact with the database. For example, in the Images component, it's used to query the images table:
+
+    const images = await db.query.images.findMany({
+    orderBy: (model, { desc }) => desc(model.id),
+    });
+
+src/app/api/uploadthing/core.ts handles the image upload process using UploadThing and creates database records using Drizzle ORM.
+src/app/utils/uploadthing.ts provides React components for the upload functionality.
+
+3. Upload Process: When a user uploads an image through UploadThing, the actual image file is stored on UploadThing's servers or a configured cloud storage service.
+
+src/app/page.tsx contains the Images component that queries the database and renders the images.
+
+4. Database Record Creation: After the upload is complete, UploadThing provides metadata about the uploaded file. The application then uses Drizzle ORM to insert a record into the local Vercel Postgres database:
+
+    await db.insert(images).values({
+    name: file.name,
+    url: file.url,
+    userId: metadata.userId,
+    })
+
+5. Image Retrieval: When the Images component needs to display images, it queries the local database using Drizzle ORM. This query retrieves the records containing the image URLs and other metadata, not the actual image files.
+
+6. Image Display: The component then uses these URLs to render the images, effectively displaying files stored on UploadThing's servers while managing the metadata in the local database.
+
