@@ -40,7 +40,7 @@ export default function HomePage() {
 
   const handleItemAdded = () => {
     // This function can be used to trigger any additional actions after an item is added
-    // For now, it's empty as the onSnapshot will automatically update the items
+    // For now, it's empty as the onSnapshot will automatically update the items.
   };
 
   const handleItemDeleted = () => {
