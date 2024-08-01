@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '~/server/db';
 import { useAuth } from "@clerk/nextjs";
 
@@ -14,11 +14,32 @@ export function ItemForm({ onItemAdded }: ItemFormProps) {
   const addItem = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if(newItem.name && newItem.count && userId) {
-      await addDoc(collection(db, 'items'), {
-        name: newItem.name.trim(),
-        count: newItem.count ,
-        userId: userId,
-      });
+      const itemName = newItem.name.trim();
+      const itemCount = parseInt(newItem.count, 10);
+
+      // Query to check if the item already exists
+      const q = query(collection(db, 'items'), 
+        where('name', '==', itemName),
+        where('userId', '==', userId)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        // Item exists, update the count
+        const existingItem = querySnapshot.docs[0]!;
+        const existingCount = existingItem.data().count as number;
+        await updateDoc(existingItem.ref, {
+          count: existingCount + itemCount
+        });
+      } else {
+        // Item doesn't exist, add it
+        await addDoc(collection(db, 'items'), {
+          name: itemName,
+          count: itemCount,
+          userId: userId,
+        });
+      }
+
       setNewItem({ name: '', count: '' });
       onItemAdded();
     }

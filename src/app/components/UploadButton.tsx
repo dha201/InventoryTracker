@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UploadButton } from '~/app/utils/uploadthing';
 import { useAuth } from "@clerk/nextjs";
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '~/server/db';
 
 interface AnalysisResponse {
@@ -37,7 +37,7 @@ const Spinner = () => {
 const CustomUploadButton: React.FC = () => {
   const { userId } = useAuth();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
   /**
    * Analyzes the uploaded image using OpenAIs image analysis API
@@ -78,26 +78,56 @@ const CustomUploadButton: React.FC = () => {
     }
     try {
       for (const item of analysisResult.items) {
-        console.log(`Adding item: ${item.item}, count: ${item.count}`);
-        await addDoc(collection(db, 'items'), {
-          name: item.item.trim(),
-          count: item.count,
-          userId: userId,
-        });
+        console.log(`Processing item: ${item.item}, count: ${item.count}`);
+        const itemName = item.item.trim();
+        
+        // Query to check if the item already exists
+        const q = query(collection(db, 'items'), 
+          where('name', '==', itemName),
+          where('userId', '==', userId)
+        );
+        const querySnapshot = await getDocs(q);
+  
+/*         if (!querySnapshot.empty) {
+          // Item exists, update the count
+          const existingItem = querySnapshot.docs[0];
+          const existingCount = existingItem.data().count;
+          await updateDoc(existingItem.ref, {
+            count: existingCount + item.count
+        }); */
+
+        if (!querySnapshot.empty && querySnapshot.docs[0]) {
+          // Item exists, update the count
+          const existingItem = querySnapshot.docs[0];
+          const existingData = existingItem?.data() as { count: number };
+          const existingCount = existingData?.count ?? 0;
+
+          await updateDoc(existingItem.ref, {
+            count: existingCount + item.count
+          });
+          console.log(`Updated existing item: ${itemName}, new count: ${existingCount + item.count}`);
+        } else {
+          // Item doesn't exist, add it
+          await addDoc(collection(db, 'items'), {
+            name: itemName,
+            count: item.count,
+            userId: userId,
+          });
+          console.log(`Added new item: ${itemName}, count: ${item.count}`);
+        }
       }
-      alert("Items added successfully");
-      console.log('All items added successfully');
+      alert("Items processed successfully");
+      console.log('All items processed successfully');
     } catch (error) {
-      console.error('Error adding items from analysis:', error);
+      console.error('Error processing items from analysis:', error);
     }
   };
 
   return (
     <div 
-      className="relative w-32 h-32 rounded-lg flex items-center justify-center cursor-pointer overflow-hidden transition-all duration-300 ease-in-out"
-      style={{
-        background: `linear-gradient(to right, #4F46E5 ${uploadProgress}%, #E5E7EB ${uploadProgress}%)`,
-      }}
+      className={`relative w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center cursor-pointer overflow-hidden transition-all duration-300 ease-in-out ${
+        isUploading ? 'animate-loading-color-change' : ''
+      }`}
     >
 
       {/* UploadButton component handles the file upload process */}
@@ -112,24 +142,19 @@ const CustomUploadButton: React.FC = () => {
           } else {
             console.error('Upload completed, but no valid URL found');
           }
-          setUploadProgress(0);
+          setIsUploading(false);
         }}
         onUploadError={(error: Error) => {
           alert(`ERROR! ${error.message}`);
+          setIsUploading(false);
         }}
         onUploadProgress={(progress) => {
-          setUploadProgress(progress);
+          setIsUploading(true);
         }}
         appearance={{
           button: "absolute inset-0 w-full h-full opacity-0",
           allowedContent: "hidden",
         }}
-      />
-
-      {/* Progress bar */}
-      <div 
-        className="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-300 ease-in-out"
-        style={{ width: `${uploadProgress}%` }}
       />
 
       {/* Display loading state or upload icon based on analysis status */}

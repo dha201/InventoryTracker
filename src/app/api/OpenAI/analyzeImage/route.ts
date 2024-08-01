@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { fetchItems } from '~/app/utils/fetchItems';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -23,13 +24,17 @@ export async function POST(req: NextRequest) {
     console.log('Received image URL for analysis:', imageUrl);
 
     try {
+
+        const itemNames: string[] = await fetchItems();
+        console.log("Fetched Items:", itemNames);
+
         const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
             {
             role: "user",
             content: [
-                { type: "text", text: `scan all items in the image, and then ONLY generate a JSON list of their item with their brand and count. Use this as a template:
+                { type: "text", text: `Scan all items in the image, and then ONLY generate a JSON list of their item with their brand and count. Use this as a template:
                 "items": [
                     {
                       "item": "Tostitos Hint of Guacamole",
@@ -51,7 +56,8 @@ export async function POST(req: NextRequest) {
                       "brand": "Private Selection Italian Style Meatballs ",
                       "count": 1
                     },
-                  ]` },
+                  ],
+                  Then use this list ${itemNames.join(', ')} to update any items that are the same but has differnt naming.` },
                 {
                 type: "image_url",
                 image_url: {

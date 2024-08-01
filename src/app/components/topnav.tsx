@@ -11,8 +11,8 @@ export function TopNav() {
       <SignedIn>
         <div className="flex space-x-4">
           <button onClick={() => router.push('/')} className="hover:text-gray-300">Scan Items</button>
-          <button onClick={() => router.push('/history')} className="hover:text-gray-300">History</button>
-          <button onClick={() => router.push('/inventory')} className="hover:text-gray-300">Current Inventory</button>
+          {/* <button onClick={() => router.push('/history')} className="hover:text-gray-300">History</button>
+          <button onClick={() => router.push('/inventory')} className="hover:text-gray-300">Current Inventory</button> */}
         </div>
       </SignedIn>
       <SignedOut>
