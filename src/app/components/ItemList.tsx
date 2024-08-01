@@ -5,7 +5,7 @@ import { db } from '~/server/db';
 interface Item {
   id: string;
   name: string;
-  price: string;
+  count: string;
 }
 
 interface ItemListProps {
@@ -25,7 +25,7 @@ export function ItemList({ items, onItemDeleted }: ItemListProps) {
         <li key={id} className='my-4 w-full flex justify-between bg-slate-950'>
           <div className='p-4 w-full flex justify-between'>
             <span className='capitalize'>{item.name}</span>
-            <span>{item.price}</span>
+            <span>{item.count}</span>
           </div>
           <button
             onClick={() => deleteItem(item.id)}

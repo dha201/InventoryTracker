@@ -8,11 +8,16 @@ export function TopNav() {
 
   return (
     <nav className="flex w-full items-center justify-between border-b p-4 text-xl font-semibold">
-      <div className="flex space-x-4">
-        <button onClick={() => router.push('/')} className="hover:text-gray-300">Scan Items</button>
-        <button onClick={() => router.push('/history')} className="hover:text-gray-300">History</button>
-        <button onClick={() => router.push('/inventory')} className="hover:text-gray-300">Current Inventory</button>
-      </div>
+      <SignedIn>
+        <div className="flex space-x-4">
+          <button onClick={() => router.push('/')} className="hover:text-gray-300">Scan Items</button>
+          <button onClick={() => router.push('/history')} className="hover:text-gray-300">History</button>
+          <button onClick={() => router.push('/inventory')} className="hover:text-gray-300">Current Inventory</button>
+        </div>
+      </SignedIn>
+      <SignedOut>
+        <div className="flex-grow"></div>
+      </SignedOut>
 
       <div>
         <SignedOut>

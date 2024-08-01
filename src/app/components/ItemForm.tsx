@@ -8,18 +8,18 @@ interface ItemFormProps {
 }
 
 export function ItemForm({ onItemAdded }: ItemFormProps) {
-  const [newItem, setNewItem] = useState({ name: '', price: '' });
+  const [newItem, setNewItem] = useState({ name: '', count: '' });
   const { userId } = useAuth();
 
   const addItem = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if(newItem.name && newItem.price && userId) {
+    if(newItem.name && newItem.count && userId) {
       await addDoc(collection(db, 'items'), {
         name: newItem.name.trim(),
-        price: newItem.price,
+        count: newItem.count ,
         userId: userId,
       });
-      setNewItem({ name: '', price: '' });
+      setNewItem({ name: '', count: '' });
       onItemAdded();
     }
   }
@@ -34,11 +34,11 @@ export function ItemForm({ onItemAdded }: ItemFormProps) {
         placeholder='Enter Item'
       />
       <input
-        value={newItem.price}
-        onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+        value={newItem.count}
+        onChange={(e) => setNewItem({ ...newItem, count: e.target.value })}
         className='col-span-2 p-3 border mx-3'
         type='number'
-        placeholder='Enter Price'
+        placeholder='Enter count'
       />
       <button
         onClick={addItem}

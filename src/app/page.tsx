@@ -14,7 +14,7 @@ import CustomUploadButton from './components/UploadButton';
 interface Item {
   id: string;
   name: string;
-  price: string;
+  count: string;
 }
 
 export const dynamic = "force-dynamic";
@@ -23,10 +23,6 @@ export default function HomePage() {
   const [items, setItems] = useState<Item[]>([]);
   const { userId } = useAuth();
 
-  const calculateTotal = (itemsArr: Item[]) => {
-    return itemsArr.reduce((sum, item) => sum + parseFloat(item.price), 0);
-  };
-
   useEffect(() => {
     if (userId) {
       const q = query(collection(db, 'items'), where("userId", "==", userId));
@@ -34,7 +30,7 @@ export default function HomePage() {
         const itemsArr: Item[] = querySnapshot.docs.map(doc => ({
           id: doc.id,
           name: doc.data().name as string,
-          price: doc.data().price as string
+          count: doc.data().count as string
         }));
         setItems(itemsArr);
       });
