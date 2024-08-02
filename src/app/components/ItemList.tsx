@@ -12,9 +12,10 @@ interface ItemListProps {
   items: Item[];
   onItemDeleted: () => void;
   searchTerm: string;
+  highlightedItemId: string | null;
 }
 
-export function ItemList({ items, onItemDeleted, searchTerm }: ItemListProps) {
+export function ItemList({ items, onItemDeleted, searchTerm, highlightedItemId }: ItemListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingField, setEditingField] = useState<'name' | 'count' | null>(null);
   const [newValue, setNewValue] = useState<string>('');
@@ -27,13 +28,10 @@ export function ItemList({ items, onItemDeleted, searchTerm }: ItemListProps) {
    * If such an item is found and its reference exists in itemRefs, it scrolls the item into view smoothly and centers it.
    */
   useEffect(() => {
-    if (searchTerm) {
-      const item = items.find(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
-      if (item && itemRefs.current[item.id]) {
-        itemRefs.current[item.id]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+    if (highlightedItemId && itemRefs.current[highlightedItemId]) {
+      itemRefs.current[highlightedItemId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }, [searchTerm, items]);
+  }, [highlightedItemId]);
 
   const deleteItem = async (id: string) => {
     await deleteDoc(doc(db, 'items', id));
@@ -77,7 +75,7 @@ export function ItemList({ items, onItemDeleted, searchTerm }: ItemListProps) {
             ref={el => {
               itemRefs.current[item.id] = el;
             }}
-            className='my-4 w-full flex justify-between bg-slate-950'
+            className={`my-4 w-full flex justify-between bg-slate-950 ${highlightedItemId === item.id ? 'animate-highlight' : ''}`}
           >
             <div className='p-4 w-full flex justify-between'>
               {editingId === item.id && editingField === 'name' ? (

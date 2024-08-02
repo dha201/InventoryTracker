@@ -23,6 +23,7 @@ export default function HomePage() {
   const [items, setItems] = useState<Item[]>([]);
   const { userId } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -53,6 +54,14 @@ export default function HomePage() {
     setSearchTerm(e.target.value);
   };
 
+  const handleFind = () => {
+    const item = items.find(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (item) {
+      setHighlightedItemId(item.id);
+      setTimeout(() => setHighlightedItemId(null), 2000); // Remove highlight after 2 seconds
+    }
+  };
+
   return (
     <main className="">
       <SignedOut>
@@ -66,15 +75,23 @@ export default function HomePage() {
               <CustomUploadButton />
             </div>
             <div className="text-center text-xlg my-4 text-white">OR</div>
-            <input
-              type="text"
-              placeholder="Search items..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="mb-4 p-2 rounded text-stone-800" 
-            />
+            <div className="flex mb-4">
+              <input
+                type="text"
+                placeholder="Search items..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="p-2 rounded text-stone-800"
+              />
+              <button
+                onClick={handleFind}
+                className="ml-2 p-2 bg-blue-500 text-white rounded"
+              >
+                Find
+              </button>
+            </div>
             <ItemForm onItemAdded={handleItemAdded} />
-            <ItemList items={items} onItemDeleted={handleItemDeleted} searchTerm={searchTerm} />
+            <ItemList items={items} onItemDeleted={handleItemDeleted} searchTerm={searchTerm} highlightedItemId={highlightedItemId} />
           </div>
         </div>
       </SignedIn>

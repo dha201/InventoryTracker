@@ -29,9 +29,14 @@ export default {
             backgroundColor: "#1e40af" // blue-600 (ending color, more intense)
           },
         },
+        highlight: {
+          "0%": { backgroundColor: "yellow" },
+          "100%": { backgroundColor: "transparent" },
+        },
       },
       animation: {
         "loading-color-change": "loading-color-change 3s ease-in-out forwards",
+        highlight: "highlight 2s ease-in-out",
       },
     },
   },
