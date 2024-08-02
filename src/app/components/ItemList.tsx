@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { deleteDoc, doc, writeBatch, updateDoc} from 'firebase/firestore';
 import { db } from '~/server/db';
 
@@ -11,12 +11,29 @@ interface Item {
 interface ItemListProps {
   items: Item[];
   onItemDeleted: () => void;
+  searchTerm: string;
 }
 
-export function ItemList({ items, onItemDeleted }: ItemListProps) {
+export function ItemList({ items, onItemDeleted, searchTerm }: ItemListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingField, setEditingField] = useState<'name' | 'count' | null>(null);
   const [newValue, setNewValue] = useState<string>('');
+  // store references to the list item elements (<li>), keyed by item id.
+  const itemRefs = useRef<Record<string, HTMLLIElement | null>>({});
+
+  /**
+   * Run whenever 'searchTerm' or 'items' change.
+   * It searches for an item whose name includes the searchTerm (case-insensitive).
+   * If such an item is found and its reference exists in itemRefs, it scrolls the item into view smoothly and centers it.
+   */
+  useEffect(() => {
+    if (searchTerm) {
+      const item = items.find(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      if (item && itemRefs.current[item.id]) {
+        itemRefs.current[item.id]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [searchTerm, items]);
 
   const deleteItem = async (id: string) => {
     await deleteDoc(doc(db, 'items', id));
@@ -55,7 +72,13 @@ export function ItemList({ items, onItemDeleted }: ItemListProps) {
     <div>
       <ul>
         {items.map((item: Item, id: number) => (
-          <li key={id} className='my-4 w-full flex justify-between bg-slate-950'>
+          <li
+            key={id}
+            ref={el => {
+              itemRefs.current[item.id] = el;
+            }}
+            className='my-4 w-full flex justify-between bg-slate-950'
+          >
             <div className='p-4 w-full flex justify-between'>
               {editingId === item.id && editingField === 'name' ? (
                 <input

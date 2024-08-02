@@ -22,6 +22,8 @@ export const dynamic = "force-dynamic";
 export default function HomePage() {
   const [items, setItems] = useState<Item[]>([]);
   const { userId } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
+
 
   useEffect(() => {
     if (userId) {
@@ -46,6 +48,10 @@ export default function HomePage() {
   const handleItemDeleted = () => {
     // Similar to handleItemAdded, this can be used for any post-deletion actions
   };
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
   return (
     <main className="">
@@ -59,9 +65,16 @@ export default function HomePage() {
             <div className="flex justify-center">
               <CustomUploadButton />
             </div>
-            <div className="text-center my-4 text-white">OR</div>
+            <div className="text-center text-xlg my-4 text-white">OR</div>
+            <input
+              type="text"
+              placeholder="Search items..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="mb-4 p-2 rounded text-stone-800" 
+            />
             <ItemForm onItemAdded={handleItemAdded} />
-            <ItemList items={items} onItemDeleted={handleItemDeleted} />
+            <ItemList items={items} onItemDeleted={handleItemDeleted} searchTerm={searchTerm} />
           </div>
         </div>
       </SignedIn>
